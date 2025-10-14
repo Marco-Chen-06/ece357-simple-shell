@@ -1,5 +1,4 @@
-#Change the line below to that it points to your shell
-#!./msh
+#!/home/marco_linux/cooper/fa_25/ece365/pset3/ece357-simple-shell/src/simpleshell
 echo TESTINGTESTING123 >testfile.out
 cat <testfile.out >testfile2.out
 ls -l
