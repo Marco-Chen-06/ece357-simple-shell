@@ -1,96 +1,74 @@
 #include "simpleshell.h"
 
-int simpleshell() {
-    char linebuf[1024];
-    int linebufsize = 0;
-
-    if(fgets(linebuf, 1024, stdin) == NULL) {
-        perror("");
-    } //maybe for here i can use something else...?
-
-
-    if(linebuf[0] == '#') { //if the line of input is a comment, just return (2)
-        return 0;
+int main(int argc, char *argv[]) {
+    FILE* fptr = NULL;
+    char line_buf[BUFSIZ]; // lines are not expected to be greater than BUFSIZ bytes long
+    char command[BUFSIZ]; // command is not expected to be greater than BUFSIZ bytes long
+    int latest_exit_status = 0; // stores exit status value of last spawned command
+    char *token_ptr = NULL;
+    if (argc > 1) {
+        // more than 1 argument implies our shell is being called through an interpreter
+        if ((fptr = fopen(argv[1], "r")) == NULL) {
+            fprintf(stderr, "Failed to fopen file: %s. %s \n", argv[1], strerror(errno));
+            exit(1);
+        }
+    } else {
+        // 1 or less arguments implies our shell is being called with no arguments
+        if((fptr = fdopen(0, "r")) == NULL) {
+            fprintf(stderr, "Failed to fdopen standard input. %s", strerror(errno));
+            exit(1);
+        }
     }
 
-    char *token;
-    char *command;
-    char **io_redirect_info;
-    int io_redirect_info_index = 0;
-
-    char **arguments;
-    int arguements_index = 0;
-
-    token = strtok(linebuf, " \t\r\n\a"); //breaks up into tokens (3)
-
-    if(strcpy(command, token) == NULL) { //first token should always be command
-        return -1;
-    }
-
-    token = strtok(NULL, " \t\r\n\a");
-
-    //format: command {argument {argument...}} {redirection operation {redirection operation}}
-
-    //lets assume the simplest case here --> no bullshit like cd <dir> && cat <file>
-
-    //QUESTION: do i need to malloc/free?
-
-    while(token != NULL) {
-
-        //printf("%s\n", token);
-        if((token[0]) == '>' || token[0] == '<' || token[0] == '2') { //look for IO redirection
-            //need to store IO redirection shit here to separate --> TODO
-            io_redirect_info[io_redirect_info_index++] = token;
+    for (;;) {
+        if (fgets(line_buf, sizeof(line_buf), fptr) == NULL) {
+            if (feof(fptr) != 0) {
+                // EOF detected, exit using status value of last spawned command
+                exit(latest_exit_status);
+            }
+            // if fgets fails, exit the program
+            fprintf(stderr, "Failed to read line using fgets. %s", strerror(errno));
+            exit(1);
         }
 
-        else { //everything else lets put it into arguments
-            arguments[arguements_index++] = token;
-        }
+        token_ptr = strtok(line_buf, " ");
 
-        token = strtok(NULL, " \t\r\n\a");
-    }
-
-    for(int i = 0; i < io_redirect_info_index; i++) {
-        printf("%s ", io_redirect_info[i]);
-    }
-
-    for(int i = 0; i < arguements_index; i++) {
-        printf("%s ", arguments[i]);
-    }
-
-
-    /*
-    int pid;
-    switch(pid = fork()) { //forking (4)
-        case -1:
+        if(strcpy(command, token_ptr) == NULL) { //first token should always be command
             return -1;
-
-        case 0: //child process runs (5C, 6C) --> need to retokenize to separate the filename to the io redirection command
-
-        for(int i = 0; i < io_redirect_info; i++) {
-            if(io_redirect_info[i][0] == '>') {
-                char *filename = r
-            }
-
-            else if(io_redirect_info[i][0] == '<') {
-                char *filename;
-            }
-
-            else {
-                char *filename;
-            }
+        } else {
+            // if command was successfully processed, move onto the next "argument"
+            token_ptr = strtok(NULL, " ");
         }
-        //exec the command here w the arguments
 
-
-
-        default: //parent (5P, 6P)
-
+        while (token_ptr != NULL) {
+            printf("Analyzing argument %s. ", token_ptr);
+            if (strncmp(token_ptr, "<", 1) == 0) {
+                // handle < filename redirection
+                printf("<filename redirection detected \n");
+            } else if (strncmp(token_ptr, ">", 1) == 0) {
+                // handle >filename redirection
+                printf(">filename redirection detected \n");
+            } else if (strncmp(token_ptr, "2>>", 3) == 0) {
+                // handle 2>filename redirection
+                printf("2>>filename redirection detected \n");
+            } else if (strncmp(token_ptr, ">>", 2) == 0) {
+                // handle >>filename redirection
+                printf(">>filename redirection detected");
+            } else if (strncmp(token_ptr, "2>", 2) == 0) {
+                // handle 2>>filename redirection
+                printf("2>filename redirection detected");
+            } else {
+                // handle argument
+                printf("normal argument detected\n");
+            }
+            token_ptr = strtok(NULL, " ");
+        }
+        if (strstr(command, "exit") != NULL) {
+            printf("EXIT!!!!");
+        }
+        printf("\n Command was: %s \n", command);
+        memset(line_buf, '\0', sizeof(line_buf));
+        memset(command, '\0', sizeof(command));
     }
-    */
 
-
-
-
-    return 0;
 }
