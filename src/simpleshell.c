@@ -7,6 +7,7 @@ int simpleshell() {
 
     int linebufsize = 0;
 
+    printf("simpleshell: ");
     if(fgets(linebuf, 1024, stdin) == NULL) { 
         perror("");
     } //maybe for here i can use something else...?
@@ -72,6 +73,7 @@ int simpleshell() {
             }
 
             if(execvp(command, arguments) == -1) { //executes command and the arguments
+                perror("command not found");
                 _exit(EXIT_FAILURE); //if execvp fails, then exits with EXIT_FAILURE status code
             }
             
