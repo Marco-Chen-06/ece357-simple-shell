@@ -3,7 +3,6 @@
 int io_redirection(char **io_redirect_info, int io_redirect_info_index);
 int simpleshell();
 
-char linebuf[1024];
 int simpleshell() {
 
     int linebufsize = 0;
