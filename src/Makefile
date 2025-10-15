@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS += -g
 
-simpleshell :  simpleshell.c
+simpleshell :  main.c simpleshell.c
 	${CC} ${CFLAGS} -o $@ $^
 
 .PHONY: clean
