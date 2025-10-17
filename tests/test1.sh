@@ -1,4 +1,4 @@
-#!/home/marco_linux/cooper/fa_25/ece365/pset3/ece357-simple-shell/src/simpleshell
+#!/home/xiaolong/cooper/fa_25/ece357/pset3/ece357-simple-shell/src/simpleshell
 echo TESTINGTESTING123 >testfile.out
 cat <testfile.out >testfile2.out
 ls -l

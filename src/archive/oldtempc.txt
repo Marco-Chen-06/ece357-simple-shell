@@ -1,4 +1,4 @@
-// marco temporary code a long time ago
+//Marco temporary code from befre
 
 #include "simpleshell.h"
 

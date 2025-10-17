@@ -1,5 +1,4 @@
-#Change the line below to that it points to your shell
-#!../src/simpleshell
+#!/home/xiaolong/cooper/fa_25/ece357/pset3/ece357-simple-shell/src/simpleshell
 #/tmp always exists on UNIX systems and is 777, so this will work
 cd /tmp
 pwd

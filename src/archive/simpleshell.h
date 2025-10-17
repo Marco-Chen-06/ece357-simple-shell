@@ -1,6 +1,3 @@
-#ifndef SIMPLESHELL_H
-#define SIMPLESHELL_H
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -11,16 +8,12 @@
 #include <dirent.h>
 #include <sys/syscall.h>
 #include <sys/stat.h>
-#include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
 #include <stdbool.h>
-#include <pwd.h>    
+#include <pwd.h>     
 #include <grp.h>
 #include <time.h>
 #include <signal.h>
-#include <limits.h>
+#include <wait.h>
 
+int simpleshell();
 int io_redirection(char **io_redirect_info, int io_redirect_info_index);
-
-#endif
