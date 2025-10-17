@@ -13,8 +13,7 @@
 #include <grp.h>
 #include <time.h>
 #include <signal.h>
+#include <wait.h>
 
 int simpleshell();
 int io_redirection(char **io_redirect_info, int io_redirect_info_index);
-
-char linebuf[1024];

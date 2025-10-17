@@ -4,88 +4,90 @@ int io_redirection(char **io_redirect_info, int io_redirect_info_index);
 int simpleshell();
 
 int simpleshell() {
+    char linebuf[1024];
+    for (;;) { 
+            int linebufsize = 0;
 
-    int linebufsize = 0;
-
-    printf("simpleshell: ");
-    if(fgets(linebuf, 1024, stdin) == NULL) { 
-        perror("");
-    } //maybe for here i can use something else...?
-
-
-    if(linebuf[0] == '#') { //if the line of input is a comment, just return (2)
-        return 0;
-    }
-
-    char *token;
-    char *command;
-    char **io_redirect_info;
-    int io_redirect_info_index = 0;
-
-    char **arguments;
-    int arguments_index = 1;
-
-    token = strtok(linebuf, " \t\r\n\a"); //breaks up into tokens (3)
-    
-    if(strcpy(command, token) == NULL || strcpy(arguments[0], token) == NULL) { //first token should always be command
-        return -1;
-    }
-    
-    token = strtok(NULL, " \t\r\n\a");
-
-    //format: command {argument {argument...}} {redirection operation {redirection operation}} 
-
-    //lets assume the simplest case here --> no bullshit like cd <dir> && cat <file>
-
-    //QUESTION: do i need to malloc/free?
-
-    while(token != NULL) {
-
-        if((token[0]) == '>' || token[0] == '<' || token[0] == '2') { //look for IO redirection
-            //need to store IO redirection shit here to separate --> TODO
-            io_redirect_info[io_redirect_info_index++] = token;
-        }
-
-        else { //everything else lets put it into arguments 
-            arguments[arguments_index++] = token; 
-        }
-
-        token = strtok(NULL, " \t\r\n\a");
-    }
-
-    
-    int pid;
-    int real_time_elapsed_begin = 0;
-    int user_CPU_time = 0;
-    int system_CPU_time = 0;
-    int status;
+            printf("simpleshell: ");
+            if(fgets(linebuf, 1024, stdin) == NULL) { 
+                perror("");
+            } //maybe for here i can use something else...?
 
 
-    switch(pid = fork()) { //forking (4)
-        case -1:
-            perror("fork error");
-            return -1;
-
-        case 0: //child process runs (5C, 6C) --> need to retokenize to separate the filename to the io redirection command 
-
-            if(io_redirection(io_redirect_info, io_redirect_info_index) != 0) {
-                _exit(EXIT_FAILURE);
+            if(linebuf[0] == '#') { //if the line of input is a comment, just return (2)
+                return 0;
             }
 
-            if(execvp(command, arguments) == -1) { //executes command and the arguments
-                perror("command not found");
-                _exit(EXIT_FAILURE); //if execvp fails, then exits with EXIT_FAILURE status code
+            char *token;
+            char command[1024];
+            char **io_redirect_info;
+            int io_redirect_info_index = 0;
+
+            char **arguments;
+            int arguments_index = 1;
+
+            token = strtok(linebuf, " \t\r\n\a"); //breaks up into tokens (3)
+            
+            if(strcpy(command, token) == NULL || strcpy(arguments[0], token) == NULL) { //first token should always be command
+                return -1;
             }
             
-            _exit(EXIT_SUCCESS); //execvp works, so exits with EXIT_SUCCESS
+            token = strtok(NULL, " \t\r\n\a");
 
-        default: //parent (5P, 6P)
-            waitpid(pid, &status, 0); //wait for child process to exit
+            //format: command {argument {argument...}} {redirection operation {redirection operation}} 
+
+            //lets assume the simplest case here --> no bullshit like cd <dir> && cat <file>
+
+            //QUESTION: do i need to malloc/free?
+
+            while(token != NULL) {
+
+                if((token[0]) == '>' || token[0] == '<' || token[0] == '2') { //look for IO redirection
+                    //need to store IO redirection shit here to separate --> TODO
+                    io_redirect_info[io_redirect_info_index++] = token;
+                }
+
+                else { //everything else lets put it into arguments 
+                    arguments[arguments_index++] = token; 
+                }
+
+                token = strtok(NULL, " \t\r\n\a");
+            }
 
             
+            int pid;
+            int real_time_elapsed_begin = 0;
+            int user_CPU_time = 0;
+            int system_CPU_time = 0;
+            int status;
 
-            return 0;
-    }
+
+            switch(pid = fork()) { //forking (4)
+                case -1:
+                    perror("fork error");
+                    return -1;
+
+                case 0: //child process runs (5C, 6C) --> need to retokenize to separate the filename to the io redirection command 
+
+                    if(io_redirection(io_redirect_info, io_redirect_info_index) != 0) {
+                        _exit(EXIT_FAILURE);
+                    }
+
+                    if(execvp(command, arguments) == -1) { //executes command and the arguments
+                        perror("command not found");
+                        _exit(EXIT_FAILURE); //if execvp fails, then exits with EXIT_FAILURE status code
+                    }
+                    
+                    _exit(EXIT_SUCCESS); //execvp works, so exits with EXIT_SUCCESS
+
+                default: //parent (5P, 6P)
+                    waitpid(pid, &status, 0); //wait for child process to exit
+
+                    
+
+                    return 0;
+            }
+        }
 }
 
 int io_redirection(char **io_redirect_info, int io_redirect_info_index) {
